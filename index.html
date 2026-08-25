@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jonathan Rich — Buffalo, NY</title>
+  <meta name="description" content="Jonathan Rich — software developer in Buffalo, New York. A leaf on the wind.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a class="nav-brand" href="index.html">Jonathan Rich</a>
+      <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="blog/index.html">Blog</a>
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-avatar">
+        <img src="https://avatars.githubusercontent.com/u/1329233?v=4&s=160" alt="Jonathan Rich" width="96" height="96">
+      </div>
+      <h1>Jonathan Rich</h1>
+      <p class="hero-bio">A leaf on the wind.</p>
+      <p class="hero-meta">
+        <span class="dot">&#9679;</span> Buffalo, New York
+      </p>
+    </section>
+
+    <section class="projects">
+      <h2>Projects</h2>
+      <ul class="project-list">
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/cohuatl" target="_blank" rel="noopener">cohuatl</a></h3>
+          <p>A simple PHP framework.</p>
+          <span class="lang">PHP</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/pipio" target="_blank" rel="noopener">pipio</a></h3>
+          <p>Evented interface for building scalable, service-oriented applications in PHP.</p>
+          <span class="lang">PHP</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/crier" target="_blank" rel="noopener">crier</a></h3>
+          <p>An Event Emitter.</p>
+          <span class="lang">PHP</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/bangjs" target="_blank" rel="noopener">bangjs</a></h3>
+          <p>JavaScript templating library.</p>
+          <span class="lang">JavaScript</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/vixen_js" target="_blank" rel="noopener">vixen_js</a></h3>
+          <p>Vixen is a small JSONP polling library.</p>
+          <span class="lang">JavaScript</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/lines" target="_blank" rel="noopener">lines</a></h3>
+          <p>Small games and experiments with lines and curves.</p>
+          <span class="lang">C#</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/fijax" target="_blank" rel="noopener">fijax</a></h3>
+          <p>Ajax form submission.</p>
+          <span class="lang">JavaScript</span>
+        </li>
+        <li class="project-card">
+          <h3><a href="https://github.com/jdrich/sergbruh" target="_blank" rel="noopener">sergbruh</a></h3>
+          <p>Basic RL tracker API integration example.</p>
+          <span class="lang">JavaScript</span>
+        </li>
+      </ul>
+      <p class="projects-more">
+        More on <a href="https://github.com/jdrich" target="_blank" rel="noopener">GitHub</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Jonathan Rich</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

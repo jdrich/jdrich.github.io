@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Jonathan Rich</title>
+  <meta name="description" content="Writing from Jonathan Rich on software, projects, and whatever else is on my mind.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a class="nav-brand" href="../index.html">Jonathan Rich</a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="index.html" class="active">Blog</a>
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Blog</h1>
+      <p>Writing on software, projects, and whatever else crosses my desk.</p>
+    </section>
+
+    <section class="blog-index">
+      <p class="empty">No posts yet. Check back soon.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>
+        &copy; <span id="year"></span> Jonathan Rich &middot;
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
