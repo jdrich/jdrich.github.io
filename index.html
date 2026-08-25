@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jonathan Rich — Buffalo, NY</title>
   <meta name="description" content="Jonathan Rich — software developer in Buffalo, New York. A leaf on the wind.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
     <nav class="container nav">
-      <a class="nav-brand" href="index.html">Jonathan Rich</a>
+      <a class="nav-brand" href="index.html">Jonathan&nbsp;Rich</a>
       <div class="nav-links">
         <a href="index.html" class="active">Home</a>
         <a href="blog/index.html">Blog</a>
@@ -22,17 +25,29 @@
   <main class="container">
     <section class="hero">
       <div class="hero-avatar">
-        <img src="https://avatars.githubusercontent.com/u/1329233?v=4&s=160" alt="Jonathan Rich" width="96" height="96">
+        <img src="https://avatars.githubusercontent.com/u/1329233?v=4&s=200" alt="Jonathan Rich" width="104" height="104">
       </div>
+      <span class="kicker">Software developer &middot; Buffalo, NY</span>
       <h1>Jonathan Rich</h1>
-      <p class="hero-bio">A leaf on the wind.</p>
-      <p class="hero-meta">
-        <span class="dot">&#9679;</span> Buffalo, New York
+      <p class="hero-bio">&ldquo;A leaf on the wind.&rdquo;<span class="aside">&mdash; me, whenever anyone asks what I&rsquo;m up to</span></p>
+      <p class="hero-about">
+        I build web applications, libraries, and the occasional small game &mdash; usually
+        in PHP, JavaScript, or C#. I&rsquo;ve shipped code professionally for a while now,
+        and I still get a kick out of the small stuff: a clean API, a troll-free codebase,
+        a CLI that doesn&rsquo;t make you read the manual.
       </p>
+      <div class="hero-links">
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener">github.com/jdrich</a>
+        <a href="blog/index.html">blog</a>
+        <a href="mailto:jdrich@gmail.com">email</a>
+      </div>
     </section>
 
     <section class="projects">
-      <h2>Projects</h2>
+      <div class="section-head">
+        <h2>Projects</h2>
+        <p class="sub">Mostly small, mostly useful, all mine.</p>
+      </div>
       <ul class="project-list">
         <li class="project-card">
           <h3><a href="https://github.com/jdrich/cohuatl" target="_blank" rel="noopener">cohuatl</a></h3>
@@ -79,11 +94,29 @@
         More on <a href="https://github.com/jdrich" target="_blank" rel="noopener">GitHub</a>.
       </p>
     </section>
+
+    <section class="shelf">
+      <div class="shelf-item">
+        <span class="icon">&#9962;</span>
+        <p><strong>Home base:</strong> Buffalo, NY &mdash; where the weather and my hobbies are both unpredictable.</p>
+      </div>
+      <div class="shelf-item">
+        <span class="icon">&#9969;&#65039;</span>
+        <p><strong>Historical note:</strong> this domain used to host a D&amp;D character sheet. Ned Brownfoot served honorably. 💐</p>
+      </div>
+      <div class="shelf-item">
+        <span class="icon">&#9749;</span>
+        <p><strong>Powered by:</strong> coffee, curiosity, and a leaf on the wind.</p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; <span id="year"></span> Jonathan Rich</p>
+      <p>
+        &copy; <span id="year"></span> Jonathan Rich &middot; Buffalo, NY
+        &middot; no trackers, no cookies &middot; <span class="leaf">&#127807;</span>
+      </p>
     </div>
   </footer>
 
