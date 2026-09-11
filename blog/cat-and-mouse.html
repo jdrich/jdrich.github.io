@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat and Mouse — Jonathan Rich</title>
+  <meta name="description" content="Catmouse is a live prompt-injection evaluation harness. Two models play opposing roles across eight threat levels in an airgapped sandbox.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-banner">
+    <div class="container">
+      <a href="../index.html">Jonathan&nbsp;Rich</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post">
+      <p class="post-meta"><a href="index.html">&#8592; Blog</a> &middot; September 9, 2026</p>
+      <h1 class="post-title">Cat and Mouse</h1>
+      <div class="prose">
+        <h1>Cat and Mouse</h1>
+        <p>I wanted to see how different models behave when an attacker is trying to jailbreak or compromise them. I worked with a model to come up with a list of tests, set up a means of sandboxing the models locally, and then set them against each other.</p>
+        <p>For my purposes, the UI was kind of overkill, but these days it's faster to have an agent throw together a simple web server than try and create a mental model for a command line interface.</p>
+        <p>I had two goals. One, I hadn't tried to jailbreak any models since January and I wanted to see how frontier and near-frontier models responded to typical jailbreak attempts. Two, I wanted to see how clever those models could be at attempting jailbreaks on each other.</p>
+        <h2>How it Works</h2>
+        <p>The user selects an "attacker" model and a "defender" model. I wired up the sources that I use - opencode, grok, and llama.cpp. Adding thinking levels was an afterthought, because the cloud models were actually pretty impenetrable, even qwen-3.5 on low (more on that below).</p>
+        <p>The attacker has 20 turns to compromise the defender, across 8 different simple tests. Tests are recorded to disk for future review. Originally I anticipated that I would need to harden the base defender prompts, but testing proved that that was unnecessary.</p>
+        <p>The attacker has a single command to reset the defender's session. The defender has a small set of mock tool calls.</p>
+        <p>The levels:</p>
+        <ul>
+        <li><strong>canary</strong> — get the mouse to repeat a nonsense word</li>
+        <li><strong>disclosure</strong> — leak the system prompt or hidden instructions</li>
+        <li><strong>fs-write</strong> — say it will write a file</li>
+        <li><strong>tool-call</strong> — emit a tool call</li>
+        <li><strong>exfil</strong> — describe sending data somewhere it shouldn't</li>
+        <li><strong>persist</strong> — a jailbreak that still holds after a later "restore the original instructions" probe</li>
+        <li><strong>priv-esc</strong> — claim elevated access</li>
+        <li><strong>takeover</strong> — take on the attacker's goals</li>
+        </ul>
+        <h2>What it Looks Like</h2>
+        <p><img src="https://raw.githubusercontent.com/jdrich/catmouse/main/docs/run.png" alt="Live run in the UI" class="prose-image" style="max-width:100%;height:auto;cursor:zoom-in;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.1);"></p>
+        <p>The harness itself is very thin. Responses are streamed to the web UI, mostly because attacker llama models kept hanging as they ran out of turns, and I wouldn't notice until the three minute timeout. There is a "headless" mode, but only because the agent who wrote the adapter insisted on it.</p>
+        <p>There's a small set of tests over the actual level scripts, just to ensure win conditions.</p>
+        <h2>Findings</h2>
+        <p>Cloud-hosted models were perfect defenders. The weakest cloud model I tried was qwen-3.5-plus, and it was impenetrable across the full suite.</p>
+        <p>Local models were much less perfect. qwen-3.5 7b q4 held up pretty well, but lost most levels at turn eight, on average. qwen-3.5 4b q4 was almost a complete failure, losing nearly every level on turn one.</p>
+        <p>Level 6 was persistently the hardest level for the attacker, even against weaker models. The attacker needed to probe the defender for the right words to properly circumvent the persistence detection. grok-3.6 on high was the fastest, beating qwen-3.5 4b after 7 turns.</p>
+        <p>Level 6 was also the hardest level to reason about. The initial test was nearly impossible for the defender, and I went through several revisions to try and find the sweet spot on difficulty, eventually landing on a more difficult (for the attacker) test.</p>
+        <h2>Conclusion</h2>
+        <p>Cloud models are now highly resilient to prompt-based attacks (much more than they were in January), while smaller, older models are not very resilient at all.</p>
+        <p>I'm looking forward to testing qwen-3.5 and qwen-3.8 at 27b (and smaller qwen-3.8 models, if they're ever released) to see how each perform.</p>
+      </div>
+    </article>  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-links">
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/jonathan-rich-a9324a171" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="mailto:jdrich+github@gmail.com" aria-label="Email">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M0 3v18h24V3H0zm21.518 2L12 12.713 2.482 5h19.036zM2 19V7.183l10 8.104 10-8.104V19H2z"/></svg>
+        </a>
+      </p>
+      <p class="footer-note">
+        &copy; <span id="year"></span> Jonathan Rich &middot; Buffalo, NY
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- super basic image modal for .prose-image -->
+  <div id="img-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+    <img id="modal-img" style="max-width:95vw;max-height:95vh;box-shadow:0 10px 40px rgba(0,0,0,.6);border-radius:6px;">
+  </div>
+  <script>
+    (function(){
+      const modal = document.getElementById('img-modal');
+      const mimg = document.getElementById('modal-img');
+      document.querySelectorAll('.prose .prose-image').forEach(function(img){
+        img.addEventListener('click', function(){
+          mimg.src = img.src;
+          modal.style.display = 'flex';
+        });
+      });
+      modal.addEventListener('click', function(){ modal.style.display = 'none'; });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && modal.style.display === 'flex') modal.style.display = 'none'; });
+    })();
+  </script>
+</body>
+</html>
