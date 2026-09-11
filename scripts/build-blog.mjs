@@ -18,7 +18,7 @@
  *
  * Homepage (index.md): frontmatter title / pageTitle / description / bio / avatar.
  * About copy is markdown until the first ## heading (Repositories). Repo cards:
- *   - [name](url) (Language) one-line description
+ *   - [name](url) one-line description
  *
  * Markdown subset supported (intentionally small — posts are short):
  *   headings (#..###), paragraphs, fenced code blocks (```), inline code,
@@ -185,9 +185,9 @@ function parseHome(src) {
   if (parts.length >= 3) {
     reposTitle = parts[1].trim();
     for (const line of parts[2].split(/\r?\n/)) {
-      const item = line.match(/^- \[([^\]]+)\]\(([^)]+)\)\s+\(([^)]+)\)\s+(.*)$/);
+      const item = line.match(/^- \[([^\]]+)\]\(([^)]+)\)\s+(.*)$/);
       if (item) {
-        repos.push({ name: item[1], url: item[2], lang: item[3], desc: item[4] });
+        repos.push({ name: item[1], url: item[2], desc: item[3] });
         continue;
       }
       if (line.trim() && !repos.length && !reposSub) reposSub = line.trim();
@@ -385,7 +385,6 @@ for (const f of readdirSync(BLOG_DIR)) {
       (r) => `        <li class="project-card">
           <h3><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a></h3>
           <p>${esc(r.desc)}</p>
-          <span class="lang">${esc(r.lang)}</span>
         </li>`,
     )
     .join("\n");

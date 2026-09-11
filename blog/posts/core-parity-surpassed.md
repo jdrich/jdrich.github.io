@@ -1,5 +1,5 @@
 ---
-title: core parity surpassed
+title: Core parity surpassed
 date: 2026-07-29
 description: Testing the limits of agent autonomy on an ASP.NET -> Laravel rewrite
 ---
