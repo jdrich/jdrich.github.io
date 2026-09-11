@@ -4,8 +4,6 @@ date: 2026-09-09
 description: Catmouse is a live prompt-injection evaluation harness. Two models play opposing roles across eight threat levels in an airgapped sandbox.
 ---
 
-# Cat and Mouse
-
 I wanted to see how different models behave when an attacker is trying to jailbreak or compromise them. I worked with a model to come up with a list of tests, set up a means of sandboxing the models locally, and then set them against each other.
 
 For my purposes, the UI was kind of overkill, but these days it's faster to have an agent throw together a simple web server than try and create a mental model for a command line interface.
