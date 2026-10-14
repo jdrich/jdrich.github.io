@@ -24,7 +24,7 @@
  *   headings (#..###), paragraphs, fenced code blocks (```), inline code,
  *   links, bold/italic, unordered lists, blockquotes (amber inset), horizontal rules.
  */
-import { mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -47,6 +47,20 @@ function absImage(src, { underBlog = false } = {}) {
   if (/^https?:\/\//i.test(src)) return src;
   const clean = src.replace(/^\.\//, "").replace(/^\/+/g, "");
   return `${SITE}/${underBlog ? "blog/" : ""}${clean}`;
+}
+
+/** PNG IHDR size for a local file under the site root. Facebook uses this so the first scrape isn't blank. */
+function pngMeta(absUrl) {
+  if (!absUrl?.startsWith(`${SITE}/`)) return undefined;
+  const file = join(ROOT, absUrl.slice(SITE.length + 1));
+  if (!existsSync(file)) return undefined;
+  const buf = readFileSync(file);
+  if (buf.length < 24 || buf[0] !== 0x89 || buf.toString("ascii", 1, 4) !== "PNG") return undefined;
+  return {
+    width: buf.readUInt32BE(16),
+    height: buf.readUInt32BE(20),
+    type: "image/png",
+  };
 }
 
 /* ---------------- markdown -> html (small subset) ---------------- */
@@ -220,7 +234,7 @@ function esc(s) {
 
 /* ---------------- page shell ---------------- */
 
-const HEAD = (title, desc, { styleHref, indexHref, banner = true, url, image, type = "website" } = {}) => {
+const HEAD = (title, desc, { styleHref, indexHref, banner = true, url, image, type = "website", published } = {}) => {
   const bannerHtml = banner
     ? `  <header class="site-banner">
     <div class="container">
@@ -232,14 +246,28 @@ const HEAD = (title, desc, { styleHref, indexHref, banner = true, url, image, ty
     : "";
   const canonical = url ? `
   <link rel="canonical" href="${esc(url)}">` : "";
+  const dims = image ? pngMeta(image) : undefined;
   const ogImage = image
     ? `
   <meta property="og:image" content="${esc(image)}">
+  <meta property="og:image:alt" content="${title}">${dims ? `
+  <meta property="og:image:type" content="${dims.type}">
+  <meta property="og:image:width" content="${dims.width}">
+  <meta property="og:image:height" content="${dims.height}">` : ""}
   <meta name="twitter:image" content="${esc(image)}">`
     : "";
+  const articleTime =
+    type === "article" && published
+      ? `
+  <meta property="article:published_time" content="${esc(published)}">`
+      : "";
   const card = image ? "summary_large_image" : "summary";
+  const prefix =
+    type === "article"
+      ? "og: https://ogp.me/ns# article: https://ogp.me/ns/article#"
+      : "og: https://ogp.me/ns#";
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="${prefix}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -247,9 +275,10 @@ const HEAD = (title, desc, { styleHref, indexHref, banner = true, url, image, ty
   <meta name="description" content="${desc}">${canonical}
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${desc}">
+  <meta property="og:locale" content="en_US">
   <meta property="og:type" content="${type}">
   <meta property="og:site_name" content="Jonathan Rich">${url ? `
-  <meta property="og:url" content="${esc(url)}">` : ""}${ogImage}
+  <meta property="og:url" content="${esc(url)}">` : ""}${ogImage}${articleTime}
   <meta name="twitter:card" content="${card}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -347,6 +376,7 @@ for (const { slug, meta, body } of posts) {
       url: `${SITE}/blog/${slug}.html`,
       image: absImage(firstImage(body), { underBlog: true }),
       type: "article",
+      published: meta.date ? `${meta.date}T00:00:00Z` : undefined,
     }) +
       content +
       FOOT,
