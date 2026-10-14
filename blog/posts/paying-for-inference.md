@@ -1,7 +1,8 @@
 ---
 title: You should be paying for AI
 date: 2026-09-22
-description: If you're asking a free chatbot about health or finances, you are the product. 
+description: If you're asking a free chatbot about health or finances, you are the product.
+image: images/paying-for-inference-og.png
 aiGenerated: false
 ---
 

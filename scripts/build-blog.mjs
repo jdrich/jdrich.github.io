@@ -34,6 +34,7 @@ const BLOG_DIR = join(ROOT, "blog");
 const HOME_MD = join(ROOT, "index.md");
 const HOME_RECENT = 3;
 const SITE = "https://jonathanri.ch";
+const DEFAULT_IMAGE = "https://avatars.githubusercontent.com/u/1329233?v=4&s=400";
 
 /** First markdown image src, or undefined. */
 function firstImage(body) {
@@ -374,7 +375,7 @@ for (const { slug, meta, body } of posts) {
       styleHref: "../style.css",
       indexHref: "../index.html",
       url: `${SITE}/blog/${slug}.html`,
-      image: absImage(firstImage(body), { underBlog: true }),
+      image: absImage(meta.image || firstImage(body), { underBlog: true }) || DEFAULT_IMAGE,
       type: "article",
       published: meta.date ? `${meta.date}T00:00:00Z` : undefined,
     }) +
@@ -413,6 +414,7 @@ writeFileSync(
     styleHref: "../style.css",
     indexHref: "../index.html",
     url: `${SITE}/blog/index.html`,
+    image: DEFAULT_IMAGE,
   }) +
     indexContent +
     FOOT,
