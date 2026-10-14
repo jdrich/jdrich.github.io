@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lancelot — Jonathan Rich</title>
+  <meta name="description" content="Rewriting my pi web UI before I go insane">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-banner">
+    <div class="container">
+      <a href="../index.html">Jonathan&nbsp;Rich</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="post">
+      <p class="post-meta"><a href="index.html">&#8592; Blog</a> &middot; October 14, 2026</p>
+      <h1 class="post-title">Lancelot</h1>
+      <div class="prose">
+        <p>I've been using the pi coding agent for the last six months. Since I'm still on Windows because of a few legacy MSSQL projects, the TUI experience is pretty poor. Most of my work has been done through a web UI. Unfortunately, that web UI was buggy, slow, and error-prone, and <code>pi-subagents</code> didn't have strong integration with the web UI I was using.</p>
+        <p>I currently run 3-4 agents simultaneously with close to a dozen active sessions at a time. The goal I set myself for the year was to be able to regularly and reliably run half a dozen simultaneous multi-hour sessions without having to check progress. Having so many issues with the main interface to the harness was drastically slowing me down. The DOM would get cluttered, spawning or forking sessions was error-prone, and the dashboard would randomly desync pi, leading to missing turns until a reboot.</p>
+        <p>I checked out a few other pi plugins for web UIs, but they all shared a similar architectural problem - why does my web UI to the agent harness need to live in the same environment as the harness? This seemed like a major antipattern to me, with the only real benefit being that the UI can be installed via <code>pi install</code>.</p>
+        <p>Lancelot is a dashboard process talking to a keeper process, one keeper for each pi session you have open. I wanted strong separation from pi - the RPC interface is stable, and spawning via the command line for new sessions is durable. I wanted to be able to restart the dashboard and have it reattach to active pi sessions, and for it not to be a buggy vibe-coded mess slowing me down.</p>
+        <p><img src="images/lancelot.png" alt="Lancelot screenshot" class="prose-image" style="max-width:100%;height:auto;cursor:zoom-in;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.1);"></p>
+        <p>The repo is <a href="https://github.com/jdrich/lancelot">jdrich/lancelot</a>.</p>
+        <p>The day pi hit 1.0, I started work on Lancelot, intending to replace my web UI within one marathon session so I could get back to being productive. I spent a reasonable amount of time with DeepSeek and Grok nailing down the process model. Thankfully, pi's RPC client is really well written. Spawning new sessions was a big hurdle with the old dashboard, so fixing that was a top priority.</p>
+        <p>I started with a pretty bare-bones UI, then set to work on a project structure that made a bit more sense to me - simple, flat JSON and JSONL files for history, config, etc. After the better part of a day, the UI was mostly in place. The RPC client still had some issues with sending things to the browser UI consistently (compactions would disappear, and messages would appear out of sync). After some debugging, replacing some bad agent work, and adding basic features like commands, typeahead, and pretty block formatting, Lancelot was born.</p>
+        <p>Once the process model was working as intended, development switched from a lone pi TUI session to the Lancelot UI. Most of the UI development was bringing over the parts of the old UI plugin that I actually used - setting model/thinking levels, manual compactions, command blocks, etc. Adding the static session persistence felt pretty elegant. That one marathon session spawned two shorter fiddly sessions over the weekend, as I cleaned up the implementation a bit, added first-class subagents (later moved into a separate project), and some other nice-to-haves (basic sounds have been a massive boon).</p>
+        <p>There were some hurdles in development, though. Early in the implementation, DeepSeek decided to keep two separate copies of the RPC feed on the server, and interleave them client-side. It took DeepSeek a while to admit it was the wrong decision, after I swore at it a few times. Scrolling nested blocks for thinking/bash and the main feed at the same time was difficult until I told DeepSeek to just use Playwright to test. There were a handful of times I had to pull up pi's RPC docs and fight with the model on what information was actually available on API calls. It had initially implemented the RPC client as two massive if/else blocks. There were some process lifecycle ownership bugs where the agent would get into a mostly stable spot and then start band-aiding the implementation until I stepped in and told it to change its approach.</p>
+        <p>Simply by moving the old extension out of pi's config, I was able to bring new session spawning down by about 20 seconds. I didn't care enough to debug the slowdown, but removing it and not having old sessions take ~60 seconds to load into the DOM (and slow everything down tremendously) was a big benefit. I noticed right away how much faster the UI felt. I'm not sure what that old plugin was doing, but it was slow. Shockingly, the minor UI enhancements and simple speedups have really reduced the friction of context switching and iterating, and I get a warm feeling now every time Lancelot pleasantly dings on a completed turn.</p>
+        <p>Overall, I'm very happy with the switchover. I should have written this a month earlier.</p>
+        <p>I excluded a few things from the build-out intentionally, most importantly auth. I built this for myself, and it's only served up to my laptop and my phone when on my home network. If I need more functionality, I can give a dispatcher/coordinator access to some sort of messaging platform (probably Slack) later, but for now I'm able to work from anywhere in the house.</p>
+        <p>I'm going to keep Lancelot a clean, "do one thing" tool, and introduce two other tools to close the loop on my workflow: Bedivere (orchestration, queuing/scheduling, agent profiles) and Morgain (agent knowledge/context repository). Lancelot and pi already have the hooks necessary to make this run cleanly, and the more I own the tools, the more I can customize and enhance my workflow.</p>
+      </div>
+    </article>  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-links">
+        <a href="https://github.com/jdrich" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/jonathan-rich-a9324a171" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="mailto:jdrich+github@gmail.com" aria-label="Email">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M0 3v18h24V3H0zm21.518 2L12 12.713 2.482 5h19.036zM2 19V7.183l10 8.104 10-8.104V19H2z"/></svg>
+        </a>
+      </p>
+      <p class="footer-note">
+        &copy; <span id="year"></span> Jonathan Rich &middot; Buffalo, NY
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- super basic image modal for .prose-image -->
+  <div id="img-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+    <img id="modal-img" style="max-width:95vw;max-height:95vh;box-shadow:0 10px 40px rgba(0,0,0,.6);border-radius:6px;">
+  </div>
+  <script>
+    (function(){
+      const modal = document.getElementById('img-modal');
+      const mimg = document.getElementById('modal-img');
+      document.querySelectorAll('.prose .prose-image').forEach(function(img){
+        img.addEventListener('click', function(){
+          mimg.src = img.src;
+          modal.style.display = 'flex';
+        });
+      });
+      modal.addEventListener('click', function(){ modal.style.display = 'none'; });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && modal.style.display === 'flex') modal.style.display = 'none'; });
+    })();
+  </script>
+</body>
+</html>
