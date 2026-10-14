@@ -33,6 +33,21 @@ const POSTS_DIR = join(ROOT, "blog", "posts");
 const BLOG_DIR = join(ROOT, "blog");
 const HOME_MD = join(ROOT, "index.md");
 const HOME_RECENT = 3;
+const SITE = "https://jonathanri.ch";
+
+/** First markdown image src, or undefined. */
+function firstImage(body) {
+  const m = String(body ?? "").match(/!\[[^\]]*\]\(([^)]+)\)/);
+  return m?.[1]?.trim();
+}
+
+/** Absolute URL for an OG image. Post-relative paths live under /blog/. */
+function absImage(src, { underBlog = false } = {}) {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  const clean = src.replace(/^\.\//, "").replace(/^\/+/g, "");
+  return `${SITE}/${underBlog ? "blog/" : ""}${clean}`;
+}
 
 /* ---------------- markdown -> html (small subset) ---------------- */
 
@@ -205,7 +220,7 @@ function esc(s) {
 
 /* ---------------- page shell ---------------- */
 
-const HEAD = (title, desc, { styleHref, indexHref, banner = true } = {}) => {
+const HEAD = (title, desc, { styleHref, indexHref, banner = true, url, image, type = "website" } = {}) => {
   const bannerHtml = banner
     ? `  <header class="site-banner">
     <div class="container">
@@ -215,13 +230,27 @@ const HEAD = (title, desc, { styleHref, indexHref, banner = true } = {}) => {
 
 `
     : "";
+  const canonical = url ? `
+  <link rel="canonical" href="${esc(url)}">` : "";
+  const ogImage = image
+    ? `
+  <meta property="og:image" content="${esc(image)}">
+  <meta name="twitter:image" content="${esc(image)}">`
+    : "";
+  const card = image ? "summary_large_image" : "summary";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
-  <meta name="description" content="${desc}">
+  <meta name="description" content="${desc}">${canonical}
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${desc}">
+  <meta property="og:type" content="${type}">
+  <meta property="og:site_name" content="Jonathan Rich">${url ? `
+  <meta property="og:url" content="${esc(url)}">` : ""}${ogImage}
+  <meta name="twitter:card" content="${card}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -315,6 +344,9 @@ for (const { slug, meta, body } of posts) {
     HEAD(`${esc(meta.title)} — Jonathan Rich`, esc(meta.description ?? meta.title), {
       styleHref: "../style.css",
       indexHref: "../index.html",
+      url: `${SITE}/blog/${slug}.html`,
+      image: absImage(firstImage(body), { underBlog: true }),
+      type: "article",
     }) +
       content +
       FOOT,
@@ -350,6 +382,7 @@ writeFileSync(
   HEAD("Blog — Jonathan Rich", "Writing from Jonathan Rich on software, clients, and the trade of shipping things.", {
     styleHref: "../style.css",
     indexHref: "../index.html",
+    url: `${SITE}/blog/index.html`,
   }) +
     indexContent +
     FOOT,
@@ -421,6 +454,8 @@ ${repoCards}
       styleHref: "style.css",
       indexHref: "index.html",
       banner: false,
+      url: `${SITE}/`,
+      image: meta.avatar,
     }) +
       homeContent +
       FOOT,
